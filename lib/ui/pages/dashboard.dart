@@ -53,12 +53,11 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
           final pendingOrders = orders.where((o) => o.orderStatus == OrderStatus.pending).toList();
           final inProgressOrders = orders.where((o) => o.orderStatus == OrderStatus.inProgress).toList();
 
-          // Update reportsService with latest orders
-          final updatedReportsService = DailyReportsService(
-            widget.reportsService.reportsRepository.runtimeType == widget.reportsService.reportsRepository.runtimeType
-                ? widget.reportsService.reportsRepository
-                : widget.reportsService.reportsRepository,
-          );
+          // final updatedReportsService = DailyReportsService(
+          //   widget.reportsService.reportsRepository.runtimeType == widget.reportsService.reportsRepository.runtimeType
+          //       ? widget.reportsService.reportsRepository
+          //       : widget.reportsService.reportsRepository,
+          // );
 
           return Column(
             children: [

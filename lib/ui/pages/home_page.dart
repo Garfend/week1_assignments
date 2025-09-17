@@ -20,9 +20,9 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  Future<void> _refresh() async {
-    setState(() {});
-  }
+  // Future<void> _refresh() async {
+  //   setState(() {});
+  // }
 
   @override
   Widget build(BuildContext context) {
