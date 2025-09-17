@@ -1,4 +1,3 @@
-import 'package:assignment1/data/local/app_database.dart';
 import 'package:assignment1/data/repository/imp/daily_reports_repository_imp.dart';
 import 'package:assignment1/data/repository/imp/order_repository_impl.dart';
 import 'package:assignment1/logic/services/daily_reports_service.dart';
@@ -20,10 +19,7 @@ Future<void> main() async {
   final dailyReportsRepository = DailyReportsRepositoryImp(allOrders);
   final reportsService = DailyReportsService(dailyReportsRepository);
 
-  runApp(AhwaaApp(
-    orderService: orderService,
-    reportsService: reportsService,
-  ));
+  runApp(AhwaaApp(orderService: orderService, reportsService: reportsService));
 }
 
 class AhwaaApp extends StatelessWidget {
