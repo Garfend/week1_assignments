@@ -4,15 +4,16 @@ import '../daily_reports_repository.dart';
 
 class DailyReportsRepositoryImp implements DailyReportsRepository {
   final List<OrderModel> orders;
+  final DateTime? selectedDate;
 
-  DailyReportsRepositoryImp(this.orders);
+  DailyReportsRepositoryImp(this.orders, {this.selectedDate});
 
   List<OrderModel> get _todayCompletedOrders {
-    final today = DateTime.now();
+    final targetDate = selectedDate ?? DateTime.now();
     return orders.where((order) =>
-    order.orderDate.year == today.year &&
-        order.orderDate.month == today.month &&
-        order.orderDate.day == today.day &&
+    order.orderDate.year == targetDate.year &&
+        order.orderDate.month == targetDate.month &&
+        order.orderDate.day == targetDate.day &&
         order.orderStatus == OrderStatus.complete
     ).toList();
   }
@@ -22,4 +23,22 @@ class DailyReportsRepositoryImp implements DailyReportsRepository {
 
   @override
   int totalItemsSold() => _todayCompletedOrders.fold<int>(0, (sum, order) => sum + order.quantity);
+
+  // Additional helper methods
+  bool get hasDataForSelectedDate => _todayCompletedOrders.isNotEmpty;
+
+  String get dateDisplayText {
+    final target = selectedDate ?? DateTime.now();
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final selected = DateTime(target.year, target.month, target.day);
+
+    if (selected == today) {
+      return 'Today';
+    } else if (selected == today.subtract(const Duration(days: 1))) {
+      return 'Yesterday';
+    } else {
+      return '${target.day}/${target.month}/${target.year}';
+    }
+  }
 }
