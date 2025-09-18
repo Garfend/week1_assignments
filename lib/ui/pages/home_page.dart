@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-
-import '../../data/repository/imp/daily_reports_repository_imp.dart';
+import '../../data/repository/imp/overall_reports_repository_imp.dart';
 import '../../data/repository/imp/top_selling_reports_repository_imp.dart';
 import '../../domain/usecase/daily_reports_usecase.dart';
 import '../../domain/usecase/order_usecase.dart';
@@ -28,9 +27,11 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Home')),
+      appBar: AppBar(
+        title: const Text('Smart Ahwa Manager'),
+      ),
       body: FutureBuilder(
-        future: _buildFreshReportsData(),
+        future: _buildOverallReportsData(),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
@@ -48,25 +49,34 @@ class _HomePageState extends State<HomePage> {
                   children: [
                     Expanded(
                       child: TotalSalesCard(
-                        title: 'Daily Units',
+                        title: 'Total Units Sold',
                         value: data['totalItems'].toString(),
                       ),
                     ),
                     Expanded(
                       child: TotalSalesCard(
-                        title: 'Daily Earned',
-                        value: data['totalSales'].toStringAsFixed(2),
+                        title: 'Total Revenue',
+                        value: '\$${data['totalSales'].toStringAsFixed(2)}',
                       ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 16),
-                const Text('Top Items'),
-                ...sortedTopItems.asMap().entries.map((e) => TopItemCard(
-                  itemName: e.value.key,
-                  soldCount: e.value.value,
-                  index: e.key + 1,
-                )),
+                const Text(
+                    'Top Selling Items (All Time)',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)
+                ),
+                if (sortedTopItems.isEmpty)
+                  const Padding(
+                    padding: EdgeInsets.all(20),
+                    child: Text('No sales data available yet'),
+                  )
+                else
+                  ...sortedTopItems.asMap().entries.map((e) => TopItemCard(
+                    itemName: e.value.key,
+                    soldCount: e.value.value,
+                    index: e.key + 1,
+                  )),
               ],
             ),
           );
@@ -75,15 +85,16 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Future<Map<String, dynamic>> _buildFreshReportsData() async {
+  Future<Map<String, dynamic>> _buildOverallReportsData() async {
     final orders = await widget.orderService.getAllOrders();
 
-    final dailyReports = DailyReportsRepositoryImp(orders);
+    // Use new SOLID-compliant repository
+    final overallReports = OverallReportsRepository(orders);
     final topSellingReports = TopSellingReportsRepositoryImp(orders);
 
     return {
-      'totalSales': dailyReports.totalSales(),
-      'totalItems': dailyReports.totalItemsSold(),
+      'totalSales': overallReports.totalSales(),
+      'totalItems': overallReports.totalItemsSold(),
       'topItems': topSellingReports.topSellingItems(),
     };
   }

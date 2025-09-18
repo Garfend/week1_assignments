@@ -21,6 +21,7 @@ class DashboardPage extends StatefulWidget {
 
 class _DashboardPageState extends State<DashboardPage> with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  DateTime _selectedDate = DateTime.now();
 
   @override
   void initState() {
@@ -38,10 +39,45 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
     setState(() {});
   }
 
+  Future<void> _selectDate() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate,
+      firstDate: DateTime(2020),
+      lastDate: DateTime.now(),
+    );
+    if (picked != null) {
+      setState(() => _selectedDate = picked);
+    }
+  }
+
+  String _getDateDisplayText() {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final selected = DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day);
+
+    if (selected == 1) {
+      return 'Today';
+    } else if (selected == today.subtract(const Duration(days: 1))) {
+      return 'Yesterday';
+    } else {
+      return '${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Dashboard')),
+      appBar: AppBar(
+        title: Text('Dashboard'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.calendar_today),
+            onPressed: _selectDate,
+            tooltip: 'Select Date',
+          ),
+        ],
+      ),
       body: FutureBuilder(
         future: widget.orderService.getAllOrders(),
         builder: (context, snapshot) {
@@ -50,9 +86,8 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
           }
           final orders = snapshot.data!;
 
-          // Create fresh reports service with current orders
           final reportsService = DailyReportsUsecase(
-              DailyReportsRepositoryImp(orders)
+              DailyReportsRepositoryImp(orders, selectedDate: _selectedDate)
           );
 
           final pendingOrders = orders.where((o) => o.orderStatus == OrderStatus.pending).toList();
@@ -64,14 +99,14 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
                 children: [
                   Expanded(
                     child: TotalSalesCard(
-                      title: 'Total Units',
+                      title: 'Daily Units',
                       value: reportsService.totalItemsSold().toString(),
                     ),
                   ),
                   Expanded(
                     child: TotalSalesCard(
-                      title: 'Total Earned',
-                      value: reportsService.totalSales().toStringAsFixed(2),
+                      title: 'Daily Revenue',
+                      value: '\$${reportsService.totalSales().toStringAsFixed(2)}',
                     ),
                   ),
                 ],
