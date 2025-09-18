@@ -2,7 +2,15 @@
 
 A modern Flutter application designed specifically for Cairo café owners to streamline order management, track popular beverages, and generate comprehensive daily sales reports.
 
-## 🎥 Demo Video
+## 📁 Project Documentation
+
+This repository contains the following resources organized in separate directories:
+
+1. **Assignment Answers** - `assignment_answers/` - Solutions and code implementations
+2. **Assignment Report** - `assignment_report/` - Detailed project documentation and analysis
+3. **Demo Video** - Available via YouTube link below or direct download from `assets/` directory
+
+# 🎥 Demo Video
 
 [![Smart Ahwa Manager Demo](https://img.youtube.com/vi/iV1F0TzmGLc/maxresdefault.jpg)](https://www.youtube.com/watch?v=iV1F0TzmGLc)
 
@@ -14,7 +22,7 @@ A modern Flutter application designed specifically for Cairo café owners to str
 - **Real-time Status Tracking**: Monitor orders through pending → in-progress → completed workflow
 - **Order Cancellation**: Cancel orders with confirmation dialogs for better control
 
-### 📊 Dashboard & Analytics
+### Dashboard & Analytics
 - **Live Dashboard**: Real-time view of pending and in-progress orders with tabbed interface
 - **Daily Sales Reports**: Track total units sold and revenue generated
 - **Top-Selling Items**: Identify most popular drinks with ranking system
