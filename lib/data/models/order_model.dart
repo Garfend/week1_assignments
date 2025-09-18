@@ -1,10 +1,12 @@
 import 'constants/order_status.dart';
-import 'item_drink.dart';
+import 'item_model.dart';
 
 class OrderModel {
   final String orderId;
 
-  final ItemDrink itemDrink;
+  final int orderNumber;
+
+  final ItemModel items;
 
   final String customerName;
 
@@ -16,16 +18,20 @@ class OrderModel {
 
   final double total;
 
+  final DateTime orderDate;
+
 
 
   OrderModel({
     required this.orderId,
-    required this.itemDrink,
+    required this.orderNumber,
+    required this.items,
     required this.customerName,
     required this.specialInstructions,
     required this.orderStatus,
     required this.quantity,
-    required this.total
+    required this.total,
+    required this.orderDate
   });
 
 }

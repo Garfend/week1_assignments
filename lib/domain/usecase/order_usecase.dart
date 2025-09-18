@@ -2,14 +2,16 @@ import '../../data/models/order_model.dart';
 import '../../data/models/constants/order_status.dart';
 import '../../data/repository/order_repository.dart';
 
-class OrderService {
+class OrderUsecase {
   final OrderRepository repository;
 
-  OrderService(this.repository);
+  OrderUsecase(this.repository);
 
   Future<List<OrderModel>> getAllOrders() => repository.getAllOrders();
 
   Future<void> addOrder(OrderModel order) => repository.addOrder(order);
+
+  Future<void> deleteOrder(String orderId) => repository.deleteOrder(orderId);
 
   Future<void> updateOrderStatus(String orderId, OrderStatus status) =>
       repository.updateOrderStatus(orderId, status);
