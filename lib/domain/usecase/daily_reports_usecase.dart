@@ -1,9 +1,9 @@
 import '../../data/repository/daily_reports_repository.dart';
 
-class DailyReportsService {
+class DailyReportsUsecase {
   final DailyReportsRepository reportsRepository;
 
-  DailyReportsService(this.reportsRepository);
+  DailyReportsUsecase(this.reportsRepository);
 
   double totalSales() => reportsRepository.totalSales();
 

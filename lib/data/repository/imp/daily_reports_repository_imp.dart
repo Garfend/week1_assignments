@@ -1,14 +1,25 @@
-import 'package:assignment1/data/models/order_model.dart';
-import 'package:assignment1/data/repository/daily_reports_repository.dart';
+import '../../models/order_model.dart';
+import '../../models/constants/order_status.dart';
+import '../daily_reports_repository.dart';
 
 class DailyReportsRepositoryImp implements DailyReportsRepository {
   final List<OrderModel> orders;
 
   DailyReportsRepositoryImp(this.orders);
 
-  @override
-  double totalSales() => orders.fold(0, (sum, order) => sum + order.itemDrink.drinkPrice);
+  List<OrderModel> get _todayCompletedOrders {
+    final today = DateTime.now();
+    return orders.where((order) =>
+    order.orderDate.year == today.year &&
+        order.orderDate.month == today.month &&
+        order.orderDate.day == today.day &&
+        order.orderStatus == OrderStatus.complete
+    ).toList();
+  }
 
   @override
-  int totalItemsSold() => orders.fold(0, (sum, order) => sum + order.quantity);
+  double totalSales() => _todayCompletedOrders.fold<double>(0.0, (sum, order) => sum + order.total);
+
+  @override
+  int totalItemsSold() => _todayCompletedOrders.fold<int>(0, (sum, order) => sum + order.quantity);
 }

@@ -1,19 +1,18 @@
 import 'package:flutter/material.dart';
 import '../../data/models/constants/order_status.dart';
-import '../../logic/services/order_service.dart';
-import '../../logic/services/daily_reports_service.dart';
-import '../widgets/add_new_order_bottomsheet.dart';
+import '../../data/repository/imp/daily_reports_repository_imp.dart';
+import '../../domain/usecase/daily_reports_usecase.dart';
+import '../../domain/usecase/order_usecase.dart';
+import '../widgets/add_new_order/add_new_order_bottomsheet.dart';
 import '../widgets/total_sales_card.dart';
-import '../widgets/drink_card.dart';
+import '../widgets/order_card.dart';
 
 class DashboardPage extends StatefulWidget {
-  final OrderService orderService;
-  final DailyReportsService reportsService;
+  final OrderUsecase orderService;
 
   const DashboardPage({
     super.key,
     required this.orderService,
-    required this.reportsService,
   });
 
   @override
@@ -50,14 +49,14 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
             return const Center(child: CircularProgressIndicator());
           }
           final orders = snapshot.data!;
+
+          // Create fresh reports service with current orders
+          final reportsService = DailyReportsUsecase(
+              DailyReportsRepositoryImp(orders)
+          );
+
           final pendingOrders = orders.where((o) => o.orderStatus == OrderStatus.pending).toList();
           final inProgressOrders = orders.where((o) => o.orderStatus == OrderStatus.inProgress).toList();
-
-          // final updatedReportsService = DailyReportsService(
-          //   widget.reportsService.reportsRepository.runtimeType == widget.reportsService.reportsRepository.runtimeType
-          //       ? widget.reportsService.reportsRepository
-          //       : widget.reportsService.reportsRepository,
-          // );
 
           return Column(
             children: [
@@ -66,13 +65,13 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
                   Expanded(
                     child: TotalSalesCard(
                       title: 'Total Units',
-                      value: widget.reportsService.totalItemsSold().toString(),
+                      value: reportsService.totalItemsSold().toString(),
                     ),
                   ),
                   Expanded(
                     child: TotalSalesCard(
                       title: 'Total Earned',
-                      value: widget.reportsService.totalSales().toStringAsFixed(2),
+                      value: reportsService.totalSales().toStringAsFixed(2),
                     ),
                   ),
                 ],
@@ -89,21 +88,25 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
                   controller: _tabController,
                   children: [
                     ListView(
-                      children: pendingOrders.map((order) => DrinkCard(
+                      children: pendingOrders.map((order) => OrderCard(
                         order: order,
+                        orderService: widget.orderService,
                         onUpdateStatus: () async {
                           await widget.orderService.updateOrderStatus(order.orderId, OrderStatus.inProgress);
                           await _refresh();
                         },
+                        onOrderDeleted: _refresh,
                       )).toList(),
                     ),
                     ListView(
-                      children: inProgressOrders.map((order) => DrinkCard(
+                      children: inProgressOrders.map((order) => OrderCard(
                         order: order,
+                        orderService: widget.orderService,
                         onUpdateStatus: () async {
                           await widget.orderService.updateOrderStatus(order.orderId, OrderStatus.complete);
                           await _refresh();
                         },
+                        onOrderDeleted: _refresh,
                       )).toList(),
                     ),
                   ],
@@ -120,6 +123,7 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
             isScrollControlled: true,
             builder: (_) => AddNewOrderBottomSheet(
               onOrderAdded: _refresh,
+              orderService: widget.orderService,
             ),
           );
         },
