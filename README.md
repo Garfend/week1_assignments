@@ -4,10 +4,7 @@ A modern Flutter application designed specifically for Cairo café owners to str
 
 ## 🎥 Demo Video
 
-<video width="600" controls>
-  <source src="https://github.com/Garfend/week1_assignments/raw/master/assets/app_demo.mp4" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
+[![Smart Ahwa Manager Demo](https://img.youtube.com/vi/iV1F0TzmGLc/maxresdefault.jpg)](https://www.youtube.com/watch?v=iV1F0TzmGLc)
 
 *Watch the Smart Ahwa Manager in action - from order creation to sales reporting*
 ## Features
