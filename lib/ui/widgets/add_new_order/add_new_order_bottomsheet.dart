@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import '../../data/models/item_drink.dart';
-import '../../data/models/order_model.dart';
-import '../../data/models/constants/order_status.dart';
-import '../../data/local/app_database.dart';
-import '../../logic/services/order_service.dart';
-import 'drink_picker.dart';
+import '../../../data/models/item_model.dart';
+import '../../../data/models/order_model.dart';
+import '../../../data/models/constants/order_status.dart';
+import '../../../data/local/app_datasource.dart';
+import '../../../domain/usecase/order_usecase.dart';
+import '../item_picker.dart';
 
 class AddNewOrderBottomSheet extends StatefulWidget {
   final VoidCallback? onOrderAdded;
-  final OrderService? orderService;
+  final OrderUsecase? orderService;
 
   const AddNewOrderBottomSheet({
     super.key,
@@ -24,8 +24,8 @@ class _AddNewOrderBottomSheetState extends State<AddNewOrderBottomSheet> {
   final _customerController = TextEditingController();
   final _instructionsController = TextEditingController();
   final _quantityController = TextEditingController(text: '1');
-  List<ItemDrink> _drinks = [];
-  ItemDrink? _selectedDrink;
+  List<ItemModel> _drinks = [];
+  ItemModel? _selectedDrink;
   bool _loading = true;
 
   @override
@@ -35,7 +35,7 @@ class _AddNewOrderBottomSheetState extends State<AddNewOrderBottomSheet> {
   }
 
   Future<void> _loadDrinks() async {
-    final drinks = await AppDatabase().getAllDrinks();
+    final drinks = await AppDatasource().getAllItems();
     setState(() {
       _drinks = drinks;
       if (drinks.isNotEmpty) _selectedDrink = drinks.first;
@@ -63,17 +63,19 @@ class _AddNewOrderBottomSheetState extends State<AddNewOrderBottomSheet> {
     final quantity = int.parse(_quantityController.text);
     final order = OrderModel(
       orderId: DateTime.now().millisecondsSinceEpoch.toString(),
-      itemDrink: _selectedDrink!,
+      orderNumber: 1, // This will be overwritten by the database
+      items: _selectedDrink!,
       customerName: _customerController.text.trim(),
       specialInstructions: _instructionsController.text.trim(),
       orderStatus: OrderStatus.pending,
       quantity: quantity,
-      total: _selectedDrink!.drinkPrice * quantity,
+      total: _selectedDrink!.itemPrice * quantity,
+      orderDate: DateTime.now(),
     );
     if (widget.orderService != null) {
       await widget.orderService!.addOrder(order);
     } else {
-      await AppDatabase().insertOrder(order);
+      await AppDatasource().insertOrder(order);
     }
     widget.onOrderAdded?.call();
     Navigator.pop(context);
@@ -95,8 +97,8 @@ class _AddNewOrderBottomSheetState extends State<AddNewOrderBottomSheet> {
           children: [
             const Text('Add New Order', style: TextStyle(fontSize: 18)),
             const SizedBox(height: 12),
-            DrinkPicker(
-              drinks: _drinks,
+            ItemPicker(
+              item: _drinks,
               selectedDrink: _selectedDrink,
               onChanged: (drink) => setState(() => _selectedDrink = drink),
             ),
