@@ -1,12 +1,18 @@
 import 'package:assignment1/data/repository/imp/daily_reports_repository_imp.dart';
 import 'package:assignment1/data/repository/imp/order_repository_impl.dart';
-import 'package:assignment1/logic/services/daily_reports_service.dart';
-import 'package:assignment1/logic/services/navigation_service.dart';
-import 'package:assignment1/logic/services/order_service.dart';
 import 'package:assignment1/ui/pages/dashboard.dart';
 import 'package:assignment1/ui/pages/home_page.dart';
+import 'package:assignment1/ui/pages/items_page.dart';
 import 'package:assignment1/ui/widgets/app_navigation_bar.dart';
 import 'package:flutter/material.dart';
+
+import 'data/repository/imp/item_repository_imp.dart';
+import 'data/repository/imp/top_selling_reports_repository_imp.dart';
+import 'domain/usecase/daily_reports_usecase.dart';
+import 'domain/usecase/item_usecase.dart';
+import 'domain/usecase/navigation_service.dart';
+import 'domain/usecase/order_usecase.dart';
+import 'domain/usecase/top_selling_reports_usecase.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -14,22 +20,39 @@ Future<void> main() async {
   // final db = AppDatabase();
   final orderRepo = OrderRepositorySQLite();
 
-  final orderService = OrderService(orderRepo);
+  final orderService = OrderUsecase(orderRepo);
+  final itemRepository = ItemRepositoryImp();
+  final itemService = ItemUsecase(itemRepository);
   final allOrders = await orderService.getAllOrders();
   final dailyReportsRepository = DailyReportsRepositoryImp(allOrders);
-  final reportsService = DailyReportsService(dailyReportsRepository);
+  final reportsService = DailyReportsUsecase(dailyReportsRepository);
+  final topSellingReportsService = TopSellingReportsUsecase(
+      TopSellingReportsRepositoryImp(allOrders),);
 
-  runApp(AhwaaApp(orderService: orderService, reportsService: reportsService));
-}
+      runApp(
+        AhwaaApp(
+          orderService: orderService,
+          reportsService: reportsService,
+          itemService: itemService,
+          topSellingReportsService: topSellingReportsService,
+
+        ),
+      );
+  }
 
 class AhwaaApp extends StatelessWidget {
-  final OrderService orderService;
-  final DailyReportsService reportsService;
+  final OrderUsecase orderService;
+  final DailyReportsUsecase reportsService;
+  final ItemUsecase itemService;
+  final TopSellingReportsUsecase topSellingReportsService;
+
 
   const AhwaaApp({
     super.key,
     required this.orderService,
     required this.reportsService,
+    required this.itemService,
+    required this.topSellingReportsService,
   });
 
   @override
@@ -40,31 +63,42 @@ class AhwaaApp extends StatelessWidget {
       navigatorKey: NavigationService.navigatorKey,
       initialRoute: '/',
       routes: {
-        '/': (context) => MainScreen(
-          orderService: orderService,
-          reportsService: reportsService,
-        ),
-        '/dashboard': (context) => DashboardPage(
-          orderService: orderService,
-          reportsService: reportsService,
-        ),
-        '/home': (context) => HomePage(
-          orderService: orderService,
-          reportsService: reportsService,
-        ),
+        '/': (context) =>
+            MainScreen(
+              orderService: orderService,
+              reportsService: reportsService,
+              itemService: itemService,
+              topSellingReportsService: topSellingReportsService,
+            ),
+        '/dashboard': (context) =>
+            DashboardPage(
+              orderService: orderService,
+            ),
+        '/home': (context) =>
+            HomePage(
+              orderService: orderService,
+              reportsService: reportsService,
+              topSellingReportsService: topSellingReportsService,
+            ),
+        '/item': (context) => ItemsPage(itemService: itemService),
       },
     );
   }
 }
 
 class MainScreen extends StatefulWidget {
-  final OrderService orderService;
-  final DailyReportsService reportsService;
+  final OrderUsecase orderService;
+  final DailyReportsUsecase reportsService;
+  final ItemUsecase itemService;
+  final TopSellingReportsUsecase topSellingReportsService;
 
   const MainScreen({
     super.key,
     required this.orderService,
     required this.reportsService,
+    required this.itemService,
+    required this.topSellingReportsService,
+
   });
 
   @override
@@ -80,11 +114,13 @@ class _MainScreenState extends State<MainScreen> {
       HomePage(
         orderService: widget.orderService,
         reportsService: widget.reportsService,
+        topSellingReportsService: widget.topSellingReportsService,
+
       ),
       DashboardPage(
         orderService: widget.orderService,
-        reportsService: widget.reportsService,
       ),
+      ItemsPage(itemService: widget.itemService),
     ];
 
     return Scaffold(
